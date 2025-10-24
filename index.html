@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>H2 Series Bed Tramming GCODE</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Bambu Lab H2 Series Bed Tramming</h1>
+  <h2>Custom GCODE Generator</h2>
+
+  <form id="gcodeForm">
+    <!-- Printer Model -->
+    <fieldset>
+      <legend>
+        Printer Model
+        <span class="info-icon">
+          i
+          <div class="tooltip">
+            Select your Bambu Lab printer model (H2S or H2D).<br>
+          </div>
+        </span>
+      </legend>
+      <label><input type="radio" name="printer" value="H2S"> H2S</label>
+      <label><input type="radio" name="printer" value="H2D"> H2D</label>
+    </fieldset>
+
+    <!-- Bed Temperature -->
+    <fieldset>
+      <legend>
+        Bed Temperature
+        <span class="info-icon">
+          i
+          <div class="tooltip">
+            Choose ambient or set a custom bed temperature to (maybe) account for some thermal expansion.<br>
+          </div>
+        </span>
+      </legend>
+      <label><input type="radio" name="tempMode" value="ambient" checked> Ambient</label>
+      <label><input type="radio" name="tempMode" value="custom"> Custom:</label>
+      <input type="number" id="customTemp" min="0" max="120" value="55" step="1" style="width: 50px;" disabled> °C
+    </fieldset>
+
+    <!-- Number of Measurement Rounds -->
+    <fieldset>
+      <legend>
+        Number of Measurement Rounds
+        <span class="info-icon">
+          i
+          <div class="tooltip">
+            Select how many rounds the bed leveling routine should perform.<br>
+          </div>
+        </span>
+      </legend>
+      <label><input type="radio" name="measureCount" value="1"> 1</label>
+      <label><input type="radio" name="measureCount" value="2"> 2</label>
+      <label><input type="radio" name="measureCount" value="3" checked> 3</label>
+      <label><input type="radio" name="measureCount" value="4"> 4</label>
+      <label><input type="radio" name="measureCount" value="5"> 5</label>
+    </fieldset>
+
+    <!-- Time at Each Measurement Point -->
+    <fieldset>
+      <legend>
+        Time (in seconds) at Each Measurement Point
+        <span class="info-icon">
+          i
+          <div class="tooltip">
+            Set the pause time at each measurement point. Choose uniform or custom per round.<br>
+          </div>
+        </span>
+      </legend>
+      <label>
+        <input type="radio" name="timeMode" value="uniform" checked>
+        Uniform:
+      </label>
+      <input type="number" id="uniformTime" min="5" max="999" value="45" step="1" style="width: 50px;">
+      <br>
+      <label>
+        <input type="radio" name="timeMode" value="custom">
+        Custom per Round
+      </label>
+      <div id="customTimeContainer"></div>
+    </fieldset>
+
+    <!-- Distance Between Printed Part and Indicator Tip -->
+    <fieldset>
+      <legend>
+        Distance Between Printed Part and Indicator Tip
+        <span class="info-icon">
+          i
+          <div class="tooltip">
+            After locking your indicator in the mount, measure and enter the distance between the printed part and the indicator tip to avoid collisions.<br>
+            <img src="images/tip_measurement.png" alt="Tip distance guide" style="max-width:100%; margin-top:5px;">
+          </div>
+        </span>
+      </legend>
+      <label>
+        Distance (mm):
+        <input type="number" id="tipDistance" value="" min="5" max="100" step="0.1" style="width: 50px;">
+      </label>
+    </fieldset>
+
+    <!-- Height for Probing -->
+    <fieldset>
+      <legend>
+        Probe Height
+        <span class="info-icon">
+          i
+          <div class="tooltip">
+            Set the height that the bed will approach when taking measurements. This is essentially the nozzle offset and 5mm is a good starting point.<br>
+          </div>
+        </span>
+      </legend>
+      <label>
+        Distance (mm):
+        <input type="number" id="probeHeight" value="5" min="3.5" max="50" step="0.1" style="width: 50px;">
+      </label>
+    </fieldset>
+
+    <button type="button" id="outputButton">Output GCODE</button>
+    or
+    <button type="button" id="downloadButton">Download GCODE</button>
+  </form>
+  <p>Attach indicator with tip NOT touching the bed prior to running GCODE!</p>
+
+  <h3>Generated GCODE:</h3>
+  <textarea id="gcodeOutput" rows="12" style="width: 100%; font-family: monospace;"></textarea>
+
+  <script src="script.js"></script>
+</body>
+</html>

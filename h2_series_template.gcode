@@ -9,6 +9,11 @@ G28; home toolhead
 G29.2 S0; turn off bed leveling compensation
 G1 Z{{TIP_DISTANCE_SAFE}} F1800; lower bed safely
 
+; MOVE TO CENTER BEFORE MAIN SEQUENCE FOR ZEROING INDICATOR =========================
+G1 Z{{TIP_DISTANCE_PROBE}} F1200; move toolhead to probe height for zeroing
+M400 S10; wait at probe height for 10 seconds
+G1 Z{{TIP_DISTANCE_SAFE}} F1800; lower bed safely
+
 ; START MAIN SEQUENCE =========================
 
 {{MEASUREMENT_ROUNDS}}

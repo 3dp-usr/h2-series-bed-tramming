@@ -238,7 +238,7 @@ async function generateGcode() {
 
   // Center coordinates for each printer
 const printerCenters = {
-  H2D: { X: 175 - 13, Y: 160 - 10 }, // move X-axis and Y-axis closer to the front instead of centered
+  H2D: { X: 175 + 11, Y: 160 - 10 }, // move X-axis and Y-axis closer to the front instead of centered
   H2S: { X: 170, Y: 160 - 10 }
 };
 

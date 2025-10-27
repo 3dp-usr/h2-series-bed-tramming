@@ -1,3 +1,6 @@
+;Version 1.1 - Updated Oct 27, 2025
+;Important user parameters: printerModel:{{PRINTER_MODEL}} | tipDistance:{{TIP_DISTANCE}}mm | probeHeight:{{TIP_DISTANCE_PROBE}}mm
+
 ;M190 S{{TEMP}}; set heatbed to user defined temp and wait until it is reached
 ;M400 S180; wait 3 minutes for bed heatsoak
 

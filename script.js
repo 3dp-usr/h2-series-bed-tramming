@@ -185,17 +185,17 @@ function checkFormValidity() {
   // Tip distance
   const tipFieldset = tipDistanceInput.closest('fieldset');
   const tipWarning = getWarningContainer(tipFieldset);
-  if (!validateNumberInput(tipDistanceInput, 5, 100)) {
+  if (!validateNumberInput(tipDistanceInput, 10, 100)) {
     valid = false;
-    tipWarning.textContent = "Tip distance must be between 5 and 100 mm.";
+    tipWarning.textContent = "Tip distance must be between 10 and 100 mm.";
   } else tipWarning.textContent = '';
 
   // Probe height
   const probeFieldset = probeHeight.closest('fieldset');
   const probeWarning = getWarningContainer(probeFieldset);
-  if (!validateNumberInput(probeHeight, 3.5, 50)) {
+  if (!validateNumberInput(probeHeight, 3, 50)) {
     valid = false;
-    probeWarning.textContent = "Probe height must be between 3.5 and 50 mm.";
+    probeWarning.textContent = "Probe height must be between 3 and 50 mm.";
   } else probeWarning.textContent = '';
 
   // Disable buttons if invalid
@@ -219,20 +219,21 @@ async function generateGcode() {
   // Determine 4-point coordinates based on printer
   let points;
   const yOffset_H2D = 18;  // offset H2D Y-axis points to account for indicator distance from original GCODE points. Not exact but close enough
-  const yOffset_H2S = 2;  // H2S
+  const xOffset_H2D = 12.5;  // offset H2D X-axis points to account for indicator distance from original GCODE points
+  const yOffset_H2S = 18;  // H2S
   if (printer === 'H2D') {
     points = [
-      { X: 70, Y: 50 + yOffset_H2D },   // Front Left
-      { X: 280, Y: 50 + yOffset_H2D },  // Front Right
-      { X: 270, Y: 300 + yOffset_H2D }, // Back Right
-      { X: 70, Y: 300 + yOffset_H2D }   // Back Left
+      { X: 70 - xOffset_H2D, Y: 50 + yOffset_H2D },   // Front Left
+      { X: 280 - xOffset_H2D, Y: 50 + yOffset_H2D },  // Front Right
+      { X: 285 - xOffset_H2D, Y: 300 + yOffset_H2D }, // Back Right
+      { X: 90 - xOffset_H2D, Y: 300 + yOffset_H2D }   // Back Left
     ];
   } else if (printer === 'H2S') {
     points = [
-      { X: 84, Y: 76 + yOffset_H2S },
-      { X: 294, Y: 76 + yOffset_H2S },
-      { X: 294, Y: 316 + yOffset_H2S },
-      { X: 84, Y: 316 + yOffset_H2S }
+      { X: 70, Y: 50 + yOffset_H2S },
+      { X: 280, Y: 50 + yOffset_H2S },
+      { X: 270, Y: 300 + yOffset_H2S },
+      { X: 70, Y: 300 + yOffset_H2S }
     ];
   }
 
@@ -261,6 +262,8 @@ const center = printerCenters[printer];
       .replace(/^;\s*M140 S0;/m, 'M140 S0;');
   }
 
+  template = template.replaceAll("{{PRINTER_MODEL}}", printer);
+  template = template.replaceAll("{{TIP_DISTANCE}}", tipDistance);
   template = template.replaceAll("{{TEMP}}", temp);
   template = template.replaceAll("{{TIP_DISTANCE_SAFE}}", tipDistance_safe);
   template = template.replaceAll("{{TIP_DISTANCE_PROBE}}", tipDistance_probe);

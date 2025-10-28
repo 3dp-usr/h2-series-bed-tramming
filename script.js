@@ -280,7 +280,10 @@ const center = printerCenters[printer];
       rounds += `G1 F4800\n`;
       rounds += `G1 X${points[p].X} Y${points[p].Y} Z${tipDistance_safe}; ${pointNames[p]}\n`;
       rounds += `G1 Z${tipDistance_probe}\n`;
-      rounds += `M400 S${measureTimes[i - 1]}\n\n`;
+      if (i === 1 && p === 0) {
+        rounds += `M400 S5; wait additional 5 seconds at probe height for zeroing indicator\n`;
+      }
+      rounds += `M400 S${measureTimes[i - 1]}\n`;
     }
     rounds += `; end measurement round ${i} ========================\n\n`;
   }

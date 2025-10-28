@@ -1,4 +1,4 @@
-;Version 1.1 - Updated Oct 27, 2025
+;GCODE Generator Version 1.2 - Updated Oct 28, 2025
 ;Important user parameters: printerModel:{{PRINTER_MODEL}} | tipDistance:{{TIP_DISTANCE}}mm | probeHeight:{{TIP_DISTANCE_PROBE}}mm
 
 ;M190 S{{TEMP}}; set heatbed to user defined temp and wait until it is reached
@@ -10,11 +10,6 @@ G90; turn ON absolute positioning
 M83; put extruder in relative mode
 G28; home toolhead
 G29.2 S0; turn off bed leveling compensation
-G1 Z{{TIP_DISTANCE_SAFE}} F1800; lower bed safely
-
-; MOVE TO CENTER BEFORE MAIN SEQUENCE FOR ZEROING INDICATOR =========================
-G1 Z{{TIP_DISTANCE_PROBE}} F1200; move toolhead to probe height for zeroing
-M400 S10; wait at probe height for 10 seconds
 G1 Z{{TIP_DISTANCE_SAFE}} F1800; lower bed safely
 
 ; START MAIN SEQUENCE =========================

@@ -166,19 +166,19 @@ function checkFormValidity() {
   const timeWarning = getWarningContainer(timeFieldset);
   const timeMode = document.querySelector('input[name="timeMode"]:checked').value;
   if (timeMode === 'uniform') {
-    if (!validateNumberInput(uniformTimeInput, 5, 999)) {
+    if (!validateNumberInput(uniformTimeInput, 1, 999)) {
       valid = false;
-      timeWarning.textContent = "Uniform time must be between 5 and 999 seconds.";
+      timeWarning.textContent = "Time must be between 1 and 999 seconds.";
     } else timeWarning.textContent = '';
   } else {
     const inputs = customTimeContainer.querySelectorAll('input[type="number"]');
     let customInvalid = false;
     inputs.forEach((input) => {
-      if (!validateNumberInput(input, 5, 999)) customInvalid = true;
+      if (!validateNumberInput(input, 1, 999)) customInvalid = true;
     });
     if (customInvalid) {
       valid = false;
-      timeWarning.textContent = "All custom round times must be between 5 and 999 seconds.";
+      timeWarning.textContent = "All times must be between 1 and 999 seconds.";
     } else timeWarning.textContent = '';
   }
 
@@ -255,12 +255,6 @@ const center = printerCenters[printer];
   }
 
   let template = await fetch("h2_series_template.gcode").then(r => r.text());
-  if (tempMode === "custom") {
-    template = template
-      .replace(/^;\s*M190 S{{TEMP}};/m, 'M190 S{{TEMP}};')
-      .replace(/^;\s*M400 S180;/m, 'M400 S180;')
-      .replace(/^;\s*M140 S0;/m, 'M140 S0;');
-  }
 
   template = template.replaceAll("{{PRINTER_MODEL}}", printer);
   template = template.replaceAll("{{TIP_DISTANCE}}", tipDistance);
@@ -283,12 +277,34 @@ const center = printerCenters[printer];
       if (i === 1 && p === 0) {
         rounds += `M400 S5; wait additional 5 seconds at probe height for zeroing indicator\n`;
       }
-      rounds += `M400 S${measureTimes[i - 1]}\n`;
+      if (p === 3) {
+        rounds += `M400 S${measureTimes[i - 1]}\n`;
+      } else{
+          rounds += `M400 S${measureTimes[i - 1]}\n\n`;
+      }
+      
     }
     rounds += `; end measurement round ${i} ========================\n\n`;
   }
 
+  // Build code for temperature settings
+  let heatup = "";
+  let preventRadiantHeat = "";
+  let cooldown = "";
+  if (tempMode === "custom") {
+        heatup += `\nM190 S${temp}; set heatbed to user defined temperature\n`;
+        preventRadiantHeat += `G1 Z160 F1800; move bed down to keep radiant heat away from printed part and indicator\n`;
+        preventRadiantHeat += `M400 S180; wait 3 minutes for bed heatsoak`;
+        cooldown += `M140 S0; cool down heatbed\n`;
+      } else {
+          preventRadiantHeat += `G1 Z${tipDistance_safe} F1800; lower bed safely`;
+      }
+  
+  // Insert code into template
+  template = template.replace(/{{HEATUP_PLATE}}/, heatup);
+  template = template.replace(/{{PREVENT_RADIANT_HEAT}}/, preventRadiantHeat);
   template = template.replace(/{{MEASUREMENT_ROUNDS}}/, rounds.trim());
+  template = template.replace(/^\s*{{COOLDOWN_PLATE}}\s*\r?\n?/m, cooldown);
   return { gcode: template, printer, measureCount, temp, tipDistance };
 }
 

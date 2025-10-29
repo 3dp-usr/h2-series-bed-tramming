@@ -1,16 +1,13 @@
-;GCODE Generator Version 1.2 - Updated Oct 28, 2025
+;GCODE Generator Version 1.3 - Updated Oct 29, 2025
 ;Important user parameters: printerModel:{{PRINTER_MODEL}} | tipDistance:{{TIP_DISTANCE}}mm | probeHeight:{{TIP_DISTANCE_PROBE}}mm
-
-;M190 S{{TEMP}}; set heatbed to user defined temp and wait until it is reached
-;M400 S180; wait 3 minutes for bed heatsoak
-
+{{HEATUP_PLATE}}
 G91; turn on relative positioning
 G1 Z{{TIP_DISTANCE_SAFE}} F1200; lower bed safely
 G90; turn ON absolute positioning
 M83; put extruder in relative mode
 G28; home toolhead
 G29.2 S0; turn off bed leveling compensation
-G1 Z{{TIP_DISTANCE_SAFE}} F1800; lower bed safely
+{{PREVENT_RADIANT_HEAT}}
 
 ; START MAIN SEQUENCE =========================
 
@@ -21,5 +18,5 @@ G1 Z{{TIP_DISTANCE_SAFE}} F1800; lower bed safely
 G1 Z{{TIP_DISTANCE_SAFE}} F1200; lower bed to safe distance
 G1 X{{CENTER_X}} Y{{CENTER_Y}} F4800; move toolhead to center
 M400; pause until Z is at the user-defined distance
-;M140 S0; cool down heatbed
+{{COOLDOWN_PLATE}}
 M18; turn all stepper motors OFF

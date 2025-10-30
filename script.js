@@ -7,6 +7,7 @@ const probeHeight = document.getElementById("probeHeight");
 const timeModeRadios = document.querySelectorAll('input[name="timeMode"]');
 const measureCountRadios = document.querySelectorAll('input[name="measureCount"]');
 const printerRadios = document.querySelectorAll('input[name="printer"]');
+const playSoundsRadios = document.querySelectorAll('input[name="playSounds"]');
 const outputButton = document.getElementById("outputButton");
 const downloadButton = document.getElementById("downloadButton");
 const gcodeOutput = document.getElementById("gcodeOutput");
@@ -136,9 +137,8 @@ measureCountRadios.forEach(radio => {
   });
 });
 
-printerRadios.forEach(radio => {
-  radio.addEventListener('change', checkFormValidity);
-});
+printerRadios.forEach(radio => radio.addEventListener('change', checkFormValidity));
+playSoundsRadios.forEach(radio => radio.addEventListener('change', checkFormValidity));
 
 // Validate entire form
 function checkFormValidity() {
@@ -156,9 +156,9 @@ function checkFormValidity() {
   // Temperature
   const tempFieldset = customTempInput.closest('fieldset');
   const tempWarning = getWarningContainer(tempFieldset);
-  if (!customTempInput.disabled && !validateNumberInput(customTempInput, 0, 120)) {
+  if (!customTempInput.disabled && !validateNumberInput(customTempInput, 15, 120)) {
     valid = false;
-    tempWarning.textContent = "Bed Temperature must be between 0°C and 120°C.";
+    tempWarning.textContent = "Bed Temperature must be between 15°C and 120°C.";
   } else tempWarning.textContent = '';
 
   // Time
@@ -215,20 +215,21 @@ async function generateGcode() {
   const tipDistance_safe = tipDistance + 3.5;
   const tipDistance_probe = probeValue;
   const temp = tempMode === 'custom' ? parseInt(customTempInput.value, 10) : 0;
+  const playSounds = document.querySelector('input[name="playSounds"]:checked').value === 'yes';
 
   // Determine 4-point coordinates based on printer
   let points;
-  const yOffset_H2D = 18;  // offset H2D Y-axis points to account for indicator distance from original GCODE points. Not exact but close enough
-  const xOffset_H2D = 12.5;  // offset H2D X-axis points to account for indicator distance from original GCODE points
-  const yOffset_H2S = 18;  // H2S
+  const yOffset_H2D = 18;
+  const xOffset_H2D = 12.5;
+  const yOffset_H2S = 18;
   if (printer === 'H2D') {
     points = [
-      { X: 70 - xOffset_H2D, Y: 50 + yOffset_H2D },   // Front Left
-      { X: 280 - xOffset_H2D, Y: 50 + yOffset_H2D },  // Front Right
-      { X: 285 - xOffset_H2D, Y: 300 + yOffset_H2D }, // Back Right
-      { X: 90 - xOffset_H2D, Y: 300 + yOffset_H2D }   // Back Left
+      { X: 70 - xOffset_H2D, Y: 50 + yOffset_H2D },
+      { X: 280 - xOffset_H2D, Y: 50 + yOffset_H2D },
+      { X: 285 - xOffset_H2D, Y: 300 + yOffset_H2D },
+      { X: 90 - xOffset_H2D, Y: 300 + yOffset_H2D }
     ];
-  } else if (printer === 'H2S') {
+  } else {
     points = [
       { X: 70, Y: 50 + yOffset_H2S },
       { X: 280, Y: 50 + yOffset_H2S },
@@ -237,13 +238,11 @@ async function generateGcode() {
     ];
   }
 
-  // Center coordinates for each printer
-const printerCenters = {
-  H2D: { X: 175 + 11, Y: 160 - 10 }, // move X-axis and Y-axis closer to the front instead of centered
-  H2S: { X: 170, Y: 160 - 10 }
-};
-
-const center = printerCenters[printer];
+  const printerCenters = {
+    H2D: { X: 175 + 11, Y: 160 - 10 },
+    H2S: { X: 170, Y: 160 - 10 }
+  };
+  const center = printerCenters[printer];
 
   // Determine measure times
   let measureTimes = [];
@@ -274,15 +273,29 @@ const center = printerCenters[printer];
       rounds += `G1 F4800\n`;
       rounds += `G1 X${points[p].X} Y${points[p].Y} Z${tipDistance_safe}; ${pointNames[p]}\n`;
       rounds += `G1 Z${tipDistance_probe}\n`;
+
+      // First round, first point zeroing sequence
       if (i === 1 && p === 0) {
+        if (playSounds) {
+          rounds += `M400\n`;
+          rounds += `M1006 S1\n`;
+          rounds += `M1006 A53 B9 L99 C53 D9 M99 E53 F9 N99; beep twice to notify indicator should be zeroed\n`;
+          rounds += `M1006 A56 B9 L99 C56 D9 M99 E56 F9 N99\n`;
+          rounds += `M1006 W\n`;
+        }
         rounds += `M400 S5; wait additional 5 seconds at probe height for zeroing indicator\n`;
       }
-      if (p === 3) {
-        rounds += `M400 S${measureTimes[i - 1]}\n`;
-      } else{
+
+      // Beep before moving to next point
+      if (playSounds) {
+        rounds += `M400 S${measureTimes[i - 1]-1}\n`;
+        rounds += `M1006 S1\n`;
+        rounds += `M1006 A56 B9 L99 C56 D9 M99 E56 F9 N99; beep before moving to next point\n`;
+        rounds += `M1006 W\n`;
+        rounds += `M400 S1\n\n`;
+      } else {
           rounds += `M400 S${measureTimes[i - 1]}\n\n`;
       }
-      
     }
     rounds += `; end measurement round ${i} ========================\n\n`;
   }
@@ -292,19 +305,20 @@ const center = printerCenters[printer];
   let preventRadiantHeat = "";
   let cooldown = "";
   if (tempMode === "custom") {
-        heatup += `\nM190 S${temp}; set heatbed to user defined temperature\n`;
-        preventRadiantHeat += `G1 Z160 F1800; move bed down to keep radiant heat away from printed part and indicator\n`;
-        preventRadiantHeat += `M400 S180; wait 3 minutes for bed heatsoak`;
-        cooldown += `M140 S0; cool down heatbed\n`;
-      } else {
-          preventRadiantHeat += `G1 Z${tipDistance_safe} F1800; lower bed safely`;
-      }
-  
+    heatup += `\nM190 S${temp}; set heatbed to user defined temperature\n`;
+    preventRadiantHeat += `G1 Z165 F1800; move bed down to keep radiant heat away from printed part and indicator\n`;
+    preventRadiantHeat += `M400 S180; wait 3 minutes for bed heatsoak`;
+    cooldown += `M140 S0; cool down heatbed\n`;
+  } else {
+    preventRadiantHeat += `G1 Z${tipDistance_safe} F1800; lower bed safely`;
+  }
+
   // Insert code into template
   template = template.replace(/{{HEATUP_PLATE}}/, heatup);
   template = template.replace(/{{PREVENT_RADIANT_HEAT}}/, preventRadiantHeat);
   template = template.replace(/{{MEASUREMENT_ROUNDS}}/, rounds.trim());
   template = template.replace(/^\s*{{COOLDOWN_PLATE}}\s*\r?\n?/m, cooldown);
+
   return { gcode: template, printer, measureCount, temp, tipDistance };
 }
 
@@ -324,7 +338,9 @@ downloadButton.addEventListener('click', async () => {
   a.href = url;
   const roundLabel = result.measureCount === 1 ? 'round' : 'rounds';
   const tempLabel = document.querySelector('input[name="tempMode"]:checked').value === 'ambient' ? 'ambient' : result.temp + 'C';
-  a.download = `${result.printer}_tram_${result.measureCount}-${roundLabel}_${tempLabel}_tip-${result.tipDistance}mm.gcode`;
+  const playSounds = document.querySelector('input[name="playSounds"]:checked').value === 'yes';
+  const soundLabel = playSounds ? 'sound' : 'noSound';
+  a.download = `${result.printer}_tram_${result.measureCount}-${roundLabel}_${tempLabel}_tip-${result.tipDistance}mm_${soundLabel}.gcode`;
   a.click();
   URL.revokeObjectURL(url);
 });

@@ -1,5 +1,5 @@
-;GCODE Generator Version 1.3 - Updated Oct 29, 2025
-;Important user parameters: printerModel:{{PRINTER_MODEL}} | tipDistance:{{TIP_DISTANCE}}mm | probeHeight:{{TIP_DISTANCE_PROBE}}mm
+;GCODE Generator Version 1.4 - Updated Oct 30, 2025
+;Important user parameters: printerModel:{{PRINTER_MODEL}} | tipDistance:{{TIP_DISTANCE}}mm | probeHeight:{{TIP_DISTANCE_PROBE}}mm | bedTemp:{{TEMP}}C
 {{HEATUP_PLATE}}
 G91; turn on relative positioning
 G1 Z{{TIP_DISTANCE_SAFE}} F1200; lower bed safely
@@ -18,5 +18,5 @@ G29.2 S0; turn off bed leveling compensation
 G1 Z{{TIP_DISTANCE_SAFE}} F1200; lower bed to safe distance
 G1 X{{CENTER_X}} Y{{CENTER_Y}} F4800; move toolhead to center
 M400; pause until Z is at the user-defined distance
-{{COOLDOWN_PLATE}}
 M18; turn all stepper motors OFF
+{{COOLDOWN_PLATE}}

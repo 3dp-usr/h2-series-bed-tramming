@@ -1,4 +1,4 @@
-;GCODE Generator Version 1.4 - Updated Oct 30, 2025
+;GCODE Generator Version 1.5 - Updated Dec 23, 2025
 ;Important user parameters: printerModel:{{PRINTER_MODEL}} | tipDistance:{{TIP_DISTANCE}}mm | probeHeight:{{TIP_DISTANCE_PROBE}}mm | bedTemp:{{TEMP}}C
 {{HEATUP_PLATE}}
 G91; turn on relative positioning
@@ -20,3 +20,4 @@ G1 X{{CENTER_X}} Y{{CENTER_Y}} F4800; move toolhead to center
 M400; pause until Z is at the user-defined distance
 M18; turn all stepper motors OFF
 {{COOLDOWN_PLATE}}
+

@@ -222,6 +222,8 @@ async function generateGcode() {
   const yOffset_H2D = 18;
   const xOffset_H2D = 12.5;
   const yOffset_H2S = 18;
+  const yOffset_H2C = 18;
+  const xOffset_H2C = 12.5;
   if (printer === 'H2D') {
     points = [
       { X: 70 - xOffset_H2D, Y: 50 + yOffset_H2D },
@@ -229,18 +231,26 @@ async function generateGcode() {
       { X: 285 - xOffset_H2D, Y: 300 + yOffset_H2D },
       { X: 90 - xOffset_H2D, Y: 300 + yOffset_H2D }
     ];
-  } else {
+  } else if (printer === 'H2S') {
     points = [
       { X: 70, Y: 50 + yOffset_H2S },
       { X: 280, Y: 50 + yOffset_H2S },
       { X: 270, Y: 300 + yOffset_H2S },
       { X: 70, Y: 300 + yOffset_H2S }
     ];
+  } else if (printer === 'H2C') {
+    points = [
+      { X: 70 - xOffset_H2C, Y: 50 + yOffset_H2C },
+      { X: 270 - xOffset_H2C, Y: 55 + yOffset_H2C },
+      { X: 255 - xOffset_H2C, Y: 290 + yOffset_H2C },
+      { X: 95 - xOffset_H2C, Y: 290 + yOffset_H2C }
+    ];
   }
 
   const printerCenters = {
     H2D: { X: 175 + 11, Y: 160 - 10 },
-    H2S: { X: 170, Y: 160 - 10 }
+    H2S: { X: 170, Y: 160 - 10 },
+    H2C: { X: 175 + 11, Y: 160 - 10 }
   };
   const center = printerCenters[printer];
 

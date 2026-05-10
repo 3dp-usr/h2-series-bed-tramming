@@ -290,7 +290,8 @@ async function generateGcode() {
           rounds += `M400\n`;
           rounds += `M1006 S1\n`;
           rounds += `M1006 A53 B9 L99 C53 D9 M99 E53 F9 N99; beep twice to notify indicator should be zeroed\n`;
-          rounds += `M1006 A56 B9 L99 C56 D9 M99 E56 F9 N99\n`;
+          rounds += `M1006 A0 B125 L0 C0 D125 M0 E0 F125 N0\n`;
+          rounds += `M1006 A53 B9 L99 C53 D9 M99 E53 F9 N99\n`;
           rounds += `M1006 W\n`;
         }
         rounds += `M400 S5; wait additional 5 seconds at probe height for zeroing indicator\n`;
@@ -302,7 +303,7 @@ async function generateGcode() {
         rounds += `M1006 S1\n`;
         rounds += `M1006 A56 B9 L99 C56 D9 M99 E56 F9 N99; beep before moving to next point\n`;
         rounds += `M1006 W\n`;
-        rounds += `M400 S1\n\n`;
+        rounds += `M400 S2\n\n`;
       } else {
           rounds += `M400 S${measureTimes[i - 1]}\n\n`;
       }

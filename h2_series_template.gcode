@@ -21,3 +21,4 @@ M400; pause until Z is at the user-defined distance
 M18; turn all stepper motors OFF
 {{COOLDOWN_PLATE}}
 
+; DONE

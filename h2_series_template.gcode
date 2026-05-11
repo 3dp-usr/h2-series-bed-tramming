@@ -1,4 +1,4 @@
-;GCODE Generator Version 1.6 - Updated May 10, 2026
+;GCODE Generator Version 1.7 - Updated May 10, 2026
 ;Important user parameters: printerModel:{{PRINTER_MODEL}} | tipDistance:{{TIP_DISTANCE}}mm | probeHeight:{{TIP_DISTANCE_PROBE}}mm | bedTemp:{{TEMP}}C
 {{HEATUP_PLATE}}
 G91; turn on relative positioning
